@@ -1,6 +1,7 @@
 defmodule ArcTest.Actions.Store do
   use ExUnit.Case, async: false
   @img "test/support/image.png"
+  @identifier "090f223e-cc0b-11e5-8993-34363bcbc210"
   import Mock
 
   defmodule DummyDefinition do
@@ -22,25 +23,33 @@ defmodule ArcTest.Actions.Store do
 
   test "single binary argument is interpreted as file path" do
     with_mock Arc.Storage.S3, [put: fn(DummyDefinition, _, {%{file_name: "image.png", path: @img}, nil}) -> :ok end] do
-      assert DummyDefinition.store(@img) == {:ok, "image.png"}
+      with_mock UUID, [uuid1: fn() -> @identifier end] do
+        assert DummyDefinition.store(@img) == {:ok, %{file_name: "image.png", identifier: @identifier}}
+      end
     end
   end
 
   test "two-tuple argument interpreted as path and scope" do
     with_mock Arc.Storage.S3, [put: fn(DummyDefinition, _, {%{file_name: "image.png", path: @img}, :scope}) -> :ok end] do
-      assert DummyDefinition.store({@img, :scope}) == {:ok, "image.png"}
+      with_mock UUID, [uuid1: fn() -> @identifier end] do
+        assert DummyDefinition.store({@img, :scope}) == {:ok, %{file_name: "image.png", identifier: @identifier}}
+      end
     end
   end
 
   test "map with a filename and path" do
     with_mock Arc.Storage.S3, [put: fn(DummyDefinition, _, {%{file_name: "image.png", path: @img}, nil}) -> :ok end] do
-      assert DummyDefinition.store(%{filename: "image.png", path: @img}) == {:ok, "image.png"}
+      with_mock UUID, [uuid1: fn() -> @identifier end] do
+        assert DummyDefinition.store(%{filename: "image.png", path: @img}) == {:ok, %{file_name: "image.png", identifier: @identifier}}
+      end
     end
   end
 
   test "two-tuple with Plug.Upload and a scope" do
     with_mock Arc.Storage.S3, [put: fn(DummyDefinition, _, {%{file_name: "image.png", path: @img}, :scope}) -> :ok end] do
-      assert DummyDefinition.store({%{filename: "image.png", path: @img}, :scope}) == {:ok, "image.png"}
+      with_mock UUID, [uuid1: fn() -> @identifier end] do
+        assert DummyDefinition.store({%{filename: "image.png", path: @img}, :scope}) == {:ok, %{file_name: "image.png", identifier: @identifier}}
+      end
     end
   end
 

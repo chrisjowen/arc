@@ -35,6 +35,7 @@ defmodule Arc.Mixfile do
     [
       {:ex_aws,    "~> 0.4.10", optional: true},
       {:httpoison, "~> 0.7",    optional: true},
+      {:uuid, "~> 1.1" },
       {:mock,      "~> 0.1.1",  only: :test}
     ]
   end
